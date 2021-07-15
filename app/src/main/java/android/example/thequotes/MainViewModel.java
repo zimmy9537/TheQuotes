@@ -2,70 +2,88 @@ package android.example.thequotes;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.lifecycle.ViewModel;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Type;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainViewModel extends ViewModel {
-    public String LOG_TAG=MainViewModel.class.getSimpleName();
-    private static final String TYPE_FIT_API="https://type.fit/api/quotes";
-    private Context context=null;
-    private ArrayList<Quote> quoteArrayList=null;
+    public String LOG_TAG = MainViewModel.class.getSimpleName();
+    private static final String TYPE_FIT_API = "https://type.fit/api/";
+    private Context context = null;
+    private ArrayList<Quote> quoteArrayList = null;
     private int index = 0;
 
-    public MainViewModel(Context context) throws IOException {
+    public MainViewModel(Context context) {
         this.context = context;
-        quoteArrayList = loadQuoteFromJson(context);
+        loadQuoteFromJson(context);
     }
 
-    private ArrayList<Quote> loadQuoteFromJson(Context context) throws IOException {
-        /*
-        ExecutorService service= Executors.newSingleThreadExecutor();
-        service.execute(new Runnable() {
+    private void loadQuoteFromJson(Context context) {
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(TYPE_FIT_API)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        QuotesApi quotesApi = retrofit.create(QuotesApi.class);
+        Call<ArrayList<Quote>> call = quotesApi.getQuotes();
+
+        call.enqueue(new Callback<ArrayList<Quote>>() {
             @Override
-            public void run() {
-                // same as the doInBackGround method of the async Task.
-                try {
-                    quoteArrayList=(ArrayList<Quote>) QueryUtils.fetchQuotesData(mUrl);
-                } catch (IOException e) {
-                    Log.e(LOG_TAG, "error fetching the data ",e);
+            public void onResponse(Call<ArrayList<Quote>> call, Response<ArrayList<Quote>> response) {
+                if (!response.isSuccessful()) {
+                    Toast.makeText(context, "response is unsuccessful " + response.code(), Toast.LENGTH_SHORT).show();
+                    return;
                 }
+                Log.d(LOG_TAG, "hit this point");
+                quoteArrayList = response.body();
+                if (quoteArrayList == null) {
+                    Log.d(LOG_TAG, "the quoteArrayList is empty in size *****");
+                }
+                Toast.makeText(context, "QUOTES :- " + quoteArrayList.size(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Call<ArrayList<Quote>> call, Throwable t) {
+                Log.d(LOG_TAG, "response Failure " + t.getMessage());
             }
         });
-        */
-        InputStream inputStream=context.getAssets().open("quotes.json");
-        int size=inputStream.available();
-        byte[] buffer=new byte[size];
-        inputStream.read(buffer);
-        inputStream.close();
-        String json=new String(buffer, StandardCharsets.UTF_8);
-        Gson gson=new Gson();
-        Type typeToken=new TypeToken<ArrayList<Quote>>(){}.getType();
-        quoteArrayList=gson.fromJson(json, typeToken);
-        return quoteArrayList;
     }
-    public Quote getQuote()
-    {
+
+    Quote quote = new Quote();
+
+    public Quote getQuote() {
+        if (quoteArrayList == null) {
+            quote.setText("abc");
+            quote.setAuthor("xyz");
+            return quote;
+        }
         return quoteArrayList.get(index);
     }
-    public Quote nextQuote()
-    {
-        return quoteArrayList.get(++index);
+
+    public Quote nextQuote() {
+//        if(quoteArrayList==null)
+//        {
+//            quote.setText("abc");
+//            quote.setAuthor("xyz");
+//            return quote;
+//        }
+        return quoteArrayList.get((++index) % quoteArrayList.size());
     }
-    public Quote previousQuote()
-    {
-        return quoteArrayList.get(--index);
+
+    public Quote previousQuote() {
+        return quoteArrayList.get((--index) % quoteArrayList.size());
+    }
+
+    public int getIndex() {
+        return (index + 1);
     }
 }
 

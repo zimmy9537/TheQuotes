@@ -22,6 +22,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+
     <LinearLayout
         android:id="@+id/ll_linear_layout"
         android:layout_width="match_parent"
@@ -92,6 +93,22 @@
             app:drawableTint="#80FFFFFF"
             android:drawableEnd="@drawable/ic_baseline_arrow_right_24"/>
     </LinearLayout>
+    <TextView
+        android:id="@+id/index"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/index_background"
+        app:layout_constraintBottom_toTopOf="@+id/ll_linear_layout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/ll_linear_layout"
+        android:gravity="center"
+        android:text="100"
+        android:textSize="20sp"
+        android:textColor="@color/white"/>
+
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

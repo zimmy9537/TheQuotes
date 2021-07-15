@@ -16,11 +16,7 @@ public class MainViewModelFactory implements ViewModelProvider.Factory {
     @Override
     public <T extends ViewModel> T create(Class<T> modelClass) {
         MainViewModel mainViewModel= null;
-        try {
-            mainViewModel = new MainViewModel(context);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        mainViewModel = new MainViewModel(context);
         return (T)mainViewModel;
     }
 }
